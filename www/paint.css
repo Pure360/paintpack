@@ -1,0 +1,91 @@
+a:link { text-decoration: underline; color: #009900; font-weight: normal;}
+a:hover { text-decoration: underline; color: #333333;}
+a:active { text-decoration: underline; color: #009900; }
+a:visited { text-decoration: underline; color: #009900; }
+
+a#call img {height: 37px; width: 90px; border-width: 0;}
+a#call img {background: url(/assets/img/homepage/button_call.gif) top left no-repeat;}
+a#call:hover img {background: url(/assets/img/homepage/button_call_on.gif) top left no-repeat;}
+
+body {
+	color: #666666;
+	font-family: helvetica,verdana,arial,sans-serif;
+	font-size: 12px;
+	background: #FFFFFF url(http://www.uploadlibrary.com/pure/PAINT/bg_gradient.gif) top left repeat-x;
+}
+
+select {
+	background: #FFFFFF;
+	color: #666666;
+	border-width: 1px;
+	border-color: #CCCCCC;
+	border-style: solid;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 11px;
+}
+
+form {
+	margin: 0px;
+}
+
+div.bar {
+	background: #33CC33 url(http://www.uploadlibrary.com/pure/PAINT/bar_gradient.gif) top left repeat-x;
+	margin: 2em auto 0px auto;
+	width: 600px;
+	padding:1em;
+	border:1px solid #66CC66;
+	text-align: left;
+}
+
+div {
+	background: #FFFFFF;
+	margin: 2em auto 0px auto;
+	width: 600px;
+	padding:1em;
+	border:1px solid #ccc;
+	text-align: left;
+}
+
+ul {
+	margin-left: 0;
+	padding-left: 25px;
+	list-style-image: url("http://www.pure360.com/assets/img/bullet.gif");
+}
+
+li {
+	margin: 0;
+	padding: 0;
+	margin-top: 3px;
+	margin-bottom: 3px;
+	color: #666666;
+	font-family: helvetica,verdana,arial,sans-serif;
+	font-size: 12px;
+}
+
+input {
+	background: #FFFFFF;
+	color: #666666;
+	border-width: 1;
+	border-color: #CCCCCC;
+	border-style: solid;
+	font-family: helvetica,verdana,arial,sans-serif;
+	font-weight: bold;
+	font-size: 10px;
+	padding: 2px;
+	margin: 2px;
+}
+
+H4 {
+	color: #FFFFFF;
+	font-family: helvetica,verdana,arial,sans-serif;
+	font-size: 22px;
+	text-align: center;
+	letter-spacing: -1px;
+	padding: 10px;
+	padding-bottom: 5px;
+	margin: 0px;
+	font-weight: 900;
+	background: #33CC33 url(http://www.uploadlibrary.com/pure/PAINT/bar_gradient.gif) top left repeat-x;
+ 	white-space: nowrap;
+}
