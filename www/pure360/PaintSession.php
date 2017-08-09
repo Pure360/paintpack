@@ -30,8 +30,8 @@ class PaintSession
 	{
         // ** ENTER YOUR CREDENTIALS HERE **
 
-		$this->loginName = "testmp";
-		$this->password = "A,Iadbmm.";
+		$this->loginName = "";
+		$this->password = "";
     }
 
     /**
