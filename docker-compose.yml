@@ -1,0 +1,8 @@
+version: '2'
+services:
+  webserver:
+    build: ./
+    ports:
+      - "2021:80"
+    volumes:
+      - ./www:/var/www/html
