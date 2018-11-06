@@ -90,8 +90,7 @@ class PaintSession
 
         // First search to see if an email already exists with this name (assumes no SMS on the account)
         $resultOutput = $this->sendRequest($facadeBean, "search", $searchParameters, null);
-print_r($resultOutput);
-die;
+
         // Access the data using the search bean name NOT the facade bean name
         $resultOutput = $resultOutput[$searchBean];
         $resultOutput = $resultOutput["idData"];
