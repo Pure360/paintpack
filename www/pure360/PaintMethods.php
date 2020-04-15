@@ -409,8 +409,7 @@ class PaintMethods extends PaintSession
 								"maxNotifications"	=> $maxNotifications,
 								"markAsReadInd"		=> $markAsReadInd,
 								"customFieldNames"	=> $customFieldNames,
-//								"clientType"		=> "CLIENT_PULL");
-								"clientType"		=> "CRM_AGENT");
+								"clientType"		=> "CLIENT_PULL");
 
         $resultOutput = $this->sendRequest("bus_facade_eventNotification", "getBatch", null, $processInput);
         $resultOutput = $resultOutput["bus_entity_eventNotificationBatch"];
