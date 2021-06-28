@@ -104,6 +104,10 @@ class PaintMethods extends PaintSession
         $emailInput["bodyPlain"]	= $bodyPlain;
         $emailInput["bodyHtml"]		= $bodyHtml;
 
+        // Attachments are supported
+        //$emailInput["attachment"] = "[base64 data]";
+        //$emailInput["attachmentName"] = "my_attachment.pdf";
+
         // Search to see if an email already exists with this name (assumes no SMS on the account)
         if(!empty($messageName))
         {
@@ -155,42 +159,12 @@ class PaintMethods extends PaintSession
      * string starting with a comma separated list of field names. At least one header 
      * must be either "email" or "mobile".
      */
-    public function createList($listName, $listDataSource, $notifyUri)
+    public function createList($listName, $listDataSource, $notifyUri, $transactionType)
     {
         $listFound = false;
         $searchInput = array();
         $listInput = array();
         $resultOutput = null;
-
-        // Search to see if a lists already exists with this name
-        $searchInput["listName"] = $listName;
-        $resultOutput = $this->search("bus_facade_campaign_list", $searchInput);
-
-        // If we found the correct list then remove it first
-        if (!empty($resultOutput))
-        {
-            // Loop through the results in case there are other lists that contain the 
-            // same string within their lists name
-            for ($index = 0; $index < count($resultOutput) && !$listFound; $index++)
-            {
-                $loadOutput = null;
-                $loadOutputFields = null;
-                $loadInput = $resultOutput[$index];
-
-                // Use the id data returned from the search to load the specific email
-                $loadOutput = $this->sendRequest("bus_facade_campaign_list", "load", $loadInput, null);
-                $loadOutputFields = $loadOutput["bus_entity_campaign_list"];
-                if ($loadOutputFields["listName"] == $listName)
-                {
-                    $removeInput = array();
-
-                    // Remove the existing list
-                    $removeInput["beanId"] = $loadOutputFields["beanId"];
-                    $this->sendRequest("bus_facade_campaign_list", "remove", $removeInput, null);
-                    $listFound = true;
-                }
-            }
-        }
 
         // Put the data for the list into the hashtable.  Note that the header row needs to
         // be split out and is used to create the custom field names.  
@@ -258,14 +232,17 @@ class PaintMethods extends PaintSession
         // Use the "paste" field to pass in the string of data.  File uploads are not currently
         // supported via PAINT.
         $listInput["pasteFile"] = $listDataSource;
+        $listInput["uploadTransactionType"] = $transactionType;
+
+        $processData = array();
 
         // Now create the new list bean for us to reference and load with data
-        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "create", null, null);
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "create", null, $processData);
 
         // Set the data onto the list and save to the system.  Note that the bean will
         // bean cleared away from the session after this
         $listInput["beanId"] = $resultOutput["bus_entity_campaign_list"]["beanId"];
-        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "store", $listInput, null);
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "store", $listInput, $processData);
 
         return $resultOutput;
     }
@@ -305,6 +282,9 @@ class PaintMethods extends PaintSession
         $deliveryDtTmStr = date("d/m/Y H:i", $deliveryDtTm);
         $deliveryInput["deliveryDtTm"] = $deliveryDtTmStr;
 
+        // Force the API to ignore missing tracking images
+        $deliveryInput["allowMissingTrackingImageInd"] = "Y";
+
         // Set the data onto the list and save to the system.  Note that the bean will
         // bean cleared away from the session after this
         $deliveryInput["beanId"] = $resultOutput["beanId"];
@@ -313,23 +293,108 @@ class PaintMethods extends PaintSession
         return $resultOutput;
     }
 
-	/**
-	* Load an existing delivery using a reference number.  High level report data will be returned
-	*/
-	public function loadDelivery($deliveryId)
-	{
-		$entityInput	= null;
-		$resultOutput	= null;
-		
+    /**
+    * Load an existing delivery using a reference number.  High level report data will be returned
+    */
+    public function loadDelivery($deliveryId)
+    {
+        $entityInput    = null;
+        $resultOutput   = null;
+        
         $entityInput = array("deliveryId" => $deliveryId);
 
         // Use the unique id to retrieve the delivery and return the bean data
         $resultOutput = $this->sendRequest("bus_facade_campaign_delivery", "load", $entityInput, null);
-        $resultOutput = $resultOutput["bus_entity_campaign_delivery"];		
+        $resultOutput = $resultOutput["bus_entity_campaign_delivery"];      
         
         return $resultOutput;
-	}
-	
+    }
+    
+    /**
+    * Load an existing email using an email ID
+    */
+    public function loadEmail($emailId)
+    {
+        $entityInput    = null;
+        $resultOutput   = null;
+        
+        $entityInput = array("emailId" => $emailId);
+
+        // Use the unique id to retrieve the delivery and return the bean data
+        $resultOutput = $this->sendRequest("bus_facade_campaign_email", "load", $entityInput, null);
+        $resultOutput = $resultOutput["bus_entity_campaign_email"];      
+        
+        return $resultOutput;
+    }
+    
+    /**
+    * Load an existing list using a list ID
+    */
+    public function loadList($listId)
+    {
+        $entityInput    = null;
+        $resultOutput   = null;
+        
+        $entityInput = array("listId" => $listId);
+
+        // Use the unique id to retrieve the delivery and return the bean data
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "load", $entityInput, null);
+        $resultOutput = $resultOutput["bus_entity_campaign_list"];      
+
+        return $resultOutput;
+    }
+    
+    /**
+    * Modify the link suffix of an existing email
+    */
+    public function modifyListFieldName($listId, $oldFieldColNo, $newFieldName)
+    {
+        $entityInput    = null;
+        $resultOutput   = null;
+        
+        $entityInput = array("listId" => $listId);
+
+        // Use the unique id to retrieve the delivery and return the bean data
+        $rawResult = $this->sendRequest("bus_facade_campaign_list", "load", $entityInput, null);
+        $emailObject = $rawResult["bus_entity_campaign_list"];
+
+        $updateInput = array();
+        $updateInput["beanId"] = $emailObject["beanId"];
+
+        $updateInput["field".$oldFieldColNo."Name"] = $newFieldName;
+
+        // Update with data and save
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "update", $updateInput, null);
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "store", $updateInput, null);
+       
+        return $resultOutput;
+    }
+
+    /**
+    * Modify the link suffix of an existing email
+    */
+    public function modifyEmailLinkSuffix($emailId,$linkSuffix)
+    {
+        $entityInput    = null;
+        $resultOutput   = null;
+        
+        $entityInput = array("emailId" => $emailId);
+
+        // Use the unique id to retrieve the delivery and return the bean data
+        $rawResult = $this->sendRequest("bus_facade_campaign_email", "load", $entityInput, null);
+        $emailObject = $rawResult["bus_entity_campaign_email"];
+
+        $updateInput = array();
+        $updateInput["beanId"] = $emailObject["beanId"];
+        $updateInput["linkSuffix"] = $linkSuffix;
+
+        // Update with data and save
+        $resultOutput = $this->sendRequest("bus_facade_campaign_email", "update", $updateInput, null);
+        $resultOutput = $this->sendRequest("bus_facade_campaign_email", "store", $updateInput, null);
+       
+        return $resultOutput;
+    }
+
     /**
      * Create a new one-to-one delivery to a specified email address and passing
      * any custom data that should merge into the message.  Note that the message must 

@@ -6,11 +6,12 @@
 	require_once("pure360/PaintMethods.php");
 
 	// Receive data posted from the form
-	$processInd	= (!empty($_REQUEST["processInd"])? $_REQUEST["processInd"]: "N");
-	$listName	= (!empty($_REQUEST["listName"])? $_REQUEST["listName"]: null);
-	$listData	= (!empty($_REQUEST["listData"])? $_REQUEST["listData"]: null);
-	$notifyUri	= (!empty($_REQUEST["notifyUri"])? $_REQUEST["notifyUri"]: null);		
-	$output		= "";
+	$processInd	     = (!empty($_REQUEST["processInd"])? $_REQUEST["processInd"]: "N");
+    $listName        = (!empty($_REQUEST["listName"])? $_REQUEST["listName"]: null);
+    $transactionType = (!empty($_REQUEST["transactionType"])? $_REQUEST["transactionType"]: "CREATE");
+	$listData	     = (!empty($_REQUEST["listData"])? $_REQUEST["listData"]: null);
+	$notifyUri	     = (!empty($_REQUEST["notifyUri"])? $_REQUEST["notifyUri"]: null);		
+	$output		     = "";
 
 	// Send the request to process
 	if($processInd=="Y")
@@ -22,7 +23,7 @@
             $paint->login();
 
             // ***** Upload your list data *****
-            $paint->createList($listName, $listData, $notifyUri);
+            $paint->createList($listName, $listData, $notifyUri, $transactionType);
 
             // Output to help the user see what's going on.
             $output = "List upload request sent.  Please wait for the system to process the request.<BR/><BR/>";
@@ -99,6 +100,9 @@
         <br />
         <font color="red"><?php echo $output; ?></font>List Name:<br />
         <input name="listName" value="<?php echo $listName; ?>"/><br />
+        <br />
+        <font color="red"><?php echo $output; ?></font>Transaction type<br />
+        <input name="transactionType" value="<?php echo $transactionType; ?>"/><br />
         <br />
         List Data:<br />
         <textarea name="listData" rows="10" cols="50"><?php echo $listData; ?></textarea><br />
