@@ -6,32 +6,41 @@
 	require_once("pure360/PaintMethods.php");
 
 	// Receive data posted from the form
-	$processInd		= (!empty($_REQUEST["processInd"])? $_REQUEST["processInd"]: "N");
-	$messageName	= (!empty($_REQUEST["messageName"])? $_REQUEST["messageName"]: null);
-	$subject		= (!empty($_REQUEST["subject"])? $_REQUEST["subject"]: null);		
-	$plainBody		= (!empty($_REQUEST["plainBody"])? $_REQUEST["plainBody"]: null);		
-	$htmlBody		= (!empty($_REQUEST["htmlBody"])? $_REQUEST["htmlBody"]: null);		
-	$output			= "";
+	$emailId    = (!empty($_REQUEST["emailId"])? $_REQUEST["emailId"]: null);
+    $linkSuffix = (!empty($_REQUEST["linkSuffix"])? $_REQUEST["linkSuffix"]: null);
+    $output		= "";
+	$emailData	= "";
 	
 	// Send the request to process
-	if($processInd=="Y")
-	{
-		
+	if(!empty($emailId))
+	{		
+	    $paint = new PaintMethods();
+	     
         try
         {
-        	$deliveryOutput = null;
-        	$deliveryId		= null;
+        	$emailOutput = null;
+
+            $displayFields = array("linkSuffix");
         	
             // ***** Log in and create a context *****
-            $paint = new PaintMethods();
             $paint->login();
 
-            // ***** Create the message *****
-            $paint->createEmail($messageName, $subject, $plainBody, $htmlBody);
-            
+            // ***** Load the email record *****
+            //$emailOutput = $paint->loadEmail($emailId);
+            $emailOutput = $paint->modifyEmailLinkSuffix($emailId, $linkSuffix);
+            $emailOutput = $paint->loadEmail($emailId);
+
             // Output to help the user see what's going on.
-            $output = "Email created<BR/><BR/>";
+            $output = "Email found.  See below for details:<BR/><BR/>";
             
+            // Remove some of the less interesting data from the array and then output the rest
+            foreach($emailOutput as $fieldName=>$fieldValue)
+            {
+            	if(in_array($fieldName, $displayFields))
+            	{
+		            $emailData .= $fieldName." = ".$fieldValue."\n";
+		        }
+	        }
         }
         catch (PaintValidationException $pve)
         {
@@ -72,25 +81,17 @@
 </head>
 <body>
     <form action="" method="post">
-    <input type="hidden" name="processInd" value="Y" />
     <div>
         <a href="index.htm"><b>home</b></a><br />
         <br />
-        <font color="red"><?php echo $output; ?></font>Email To:
+        Example of modifying an existing email, in this example case the link suffix which is appended to all links in the email.&nbsp; You will need the email ID that was returned when the email was created.<br />
         <br />
-        Use this page to enter the details of the message.<br />
-        <br />
-        Message Name:<br />
-        <input name="messageName" value="<?php echo $messageName;?>" /><br />
-        Subject:<br />
-        <input name="subject" value="<?php echo $subject;?>" /><br />
-        <br />
-        Plain Message:<br />
-        <textarea name="plainBody" rows="10" cols="50"><?php echo $plainBody;?></textarea><br />
-        HTML Message:<br />
-        <textarea name="htmlBody" rows="10" cols="50"><?php echo $htmlBody;?></textarea><br />
-        <br />
-        <input type="submit" value="Create" /></div>
+        <font color="red"><?php echo $output; ?></font>email reference (id):
+        <input name="emailId" value="<?php echo $emailId; ?>"/>
+        <br />New link suffix:<input name="linkSuffix" />
+        <br /><input type="submit" value="Modify Email" />
+		<pre><?php echo $emailData; ?></pre>
+    </div>
     </form>
 </body>
 </html>

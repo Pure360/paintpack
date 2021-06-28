@@ -6,32 +6,41 @@
 	require_once("pure360/PaintMethods.php");
 
 	// Receive data posted from the form
-	$processInd		= (!empty($_REQUEST["processInd"])? $_REQUEST["processInd"]: "N");
-	$messageName	= (!empty($_REQUEST["messageName"])? $_REQUEST["messageName"]: null);
-	$subject		= (!empty($_REQUEST["subject"])? $_REQUEST["subject"]: null);		
-	$plainBody		= (!empty($_REQUEST["plainBody"])? $_REQUEST["plainBody"]: null);		
-	$htmlBody		= (!empty($_REQUEST["htmlBody"])? $_REQUEST["htmlBody"]: null);		
-	$output			= "";
+	$listId    = (!empty($_REQUEST["listId"])? $_REQUEST["listId"]: null);
+    $oldFieldColNo     = (!empty($_REQUEST["oldFieldColNo"])? $_REQUEST["oldFieldColNo"]: null);
+    $newFieldName     = (!empty($_REQUEST["newFieldName"])? $_REQUEST["newFieldName"]: null);
+    $output			= "";
+	$listData	= "";
 	
 	// Send the request to process
-	if($processInd=="Y")
-	{
-		
+	if(!empty($listId))
+	{		
+	    $paint = new PaintMethods();
+	     
         try
         {
-        	$deliveryOutput = null;
-        	$deliveryId		= null;
+        	$listOutput = null;
+        	$displayFields	= array("listName",
+                "field1Name");
         	
             // ***** Log in and create a context *****
-            $paint = new PaintMethods();
             $paint->login();
 
-            // ***** Create the message *****
-            $paint->createEmail($messageName, $subject, $plainBody, $htmlBody);
-            
+            // ***** Load the list record *****
+            $listOutput = $paint->modifyListFieldName($listId, $oldFieldColNo, $newFieldName);
+            $listOutput = $paint->loadlist($listId);
+
             // Output to help the user see what's going on.
-            $output = "Email created<BR/><BR/>";
+            $output = "list found.  See below for details:<BR/><BR/>";
             
+            // Remove some of the less interesting data from the array and then output the rest
+            foreach($listOutput as $fieldName=>$fieldValue)
+            {
+            	if(in_array($fieldName, $displayFields))
+            	{
+		            $listData .= $fieldName." = ".$fieldValue."\n";
+		        }
+	        }
         }
         catch (PaintValidationException $pve)
         {
@@ -72,25 +81,22 @@
 </head>
 <body>
     <form action="" method="post">
-    <input type="hidden" name="processInd" value="Y" />
     <div>
         <a href="index.htm"><b>home</b></a><br />
         <br />
-        <font color="red"><?php echo $output; ?></font>Email To:
+        Load an existing list.&nbsp; You will need the reference number (list id) that was 
+        returned when the list was created.<br />
         <br />
-        Use this page to enter the details of the message.<br />
+        <font color="red"><?php echo $output; ?></font>list reference (id):
+        <input name="listId" value="<?php echo $listId; ?>"/>
         <br />
-        Message Name:<br />
-        <input name="messageName" value="<?php echo $messageName;?>" /><br />
-        Subject:<br />
-        <input name="subject" value="<?php echo $subject;?>" /><br />
+        Existing field column number:<input name="oldFieldColNo" />
         <br />
-        Plain Message:<br />
-        <textarea name="plainBody" rows="10" cols="50"><?php echo $plainBody;?></textarea><br />
-        HTML Message:<br />
-        <textarea name="htmlBody" rows="10" cols="50"><?php echo $htmlBody;?></textarea><br />
+        New field name:<input name="newFieldName" />
         <br />
-        <input type="submit" value="Create" /></div>
+        <input type="submit" value="Modify list" />
+		<pre><?php echo $listData; ?></pre>
+    </div>
     </form>
 </body>
 </html>
