@@ -4,6 +4,8 @@ require_once("PaintSystemException.php");
 require_once("PaintSecurityException.php");
 require_once("PaintValidationException.php");
 
+date_default_timezone_set('Europe/London');
+
 /**
 *
 * Utility class for creating and re-using a session within PAINT.  Utility
