@@ -84,6 +84,25 @@ class PaintMethods extends PaintSession
 		return $resultOutput;
     }
 
+    /**
+     * Search emails
+     */
+    public function searchLists($listName = null)
+    {
+        $searchInput = array();
+        $resultOutput = null;
+
+        // Search to see if an email already exists with this name (assumes no SMS on the account)
+        if(!empty($listName))
+        {
+            $searchInput["listName"] = $listName;
+        }
+
+        $resultOutput = $this->search("bus_facade_campaign_list", $searchInput);
+
+        return $resultOutput;
+    }
+
    /**
      * Create a new message on the account.  This function isolates some of the basic features
      * of a message.  More complicated features must be accessed using the sendRequest
