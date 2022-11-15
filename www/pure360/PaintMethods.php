@@ -401,6 +401,33 @@ class PaintMethods extends PaintSession
         return $resultOutput;
     }
 
+     /**
+    * Modify the data type of a list field
+    */
+    public function modifyListFieldDataType($listId, $oldFieldColNo, $newFieldDataType, $newFieldDataFormat)
+    {
+        $entityInput    = null;
+        $resultOutput   = null;
+        
+        $entityInput = array("listId" => $listId);
+
+        // Use the unique id to retrieve the delivery and return the bean data
+        $rawResult = $this->sendRequest("bus_facade_campaign_list", "load", $entityInput, null);
+        $emailObject = $rawResult["bus_entity_campaign_list"];
+
+        $updateInput = array();
+        $updateInput["beanId"] = $emailObject["beanId"];
+
+        $updateInput["field".$oldFieldColNo."DataType"] = $newFieldDataType;
+        $updateInput["field".$oldFieldColNo."DataFormat"] = $newFieldDataFormat;
+
+        // Update with data and save
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "update", $updateInput, null);
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "store", $updateInput, null);
+       
+        return $resultOutput;
+    }
+
     /**
     * Modify the link suffix of an existing email
     */
