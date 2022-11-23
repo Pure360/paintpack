@@ -20,12 +20,41 @@ class PaintMethods extends PaintSession
         // Search to see if an email already exists with this name (assumes no SMS on the account)
         if(!empty($messageName))
         {
-	        $searchInput["messageName"] = $messageName;
-	    }
+            $searchInput["messageName"] = $messageName;
+        }
 
-		$resultOutput = $this->search("bus_facade_campaign_message", $searchInput);
+        $resultOutput = $this->search("bus_facade_campaign_message", $searchInput);
 
-		return $resultOutput;
+        return $resultOutput;
+    }
+
+    /**
+     * delete email dynamic regions by email ID
+     */
+    public function deleteEmailRegions($emailId = null)
+    {
+        $resultOutput = array();
+
+        $emailLoadOutput = $this->loadEmail($emailId);
+
+        $regionsLoadInput = array("beanId" => $emailLoadOutput["bus_entity_campaign_email"]["beanId"]);
+
+        $regionsLoadOutput = $this->sendRequest("bus_facade_campaign_email", "loadDynamicRegions", $regionsLoadInput, null);
+
+        foreach($regionsLoadOutput["dynamicRegionBeanIds"] as $id => $regionBeanId)
+        {
+            $regionRemoveInput = array("beanId" => $regionBeanId);
+            $this->sendRequest("bus_facade_campaign_dynamicRegion", "remove", $regionRemoveInput, null);
+            $this->sendRequest("bus_facade_campaign_dynamicRegion", "store", $regionRemoveInput, null);
+        }
+
+        $emailLoadOutput = $this->loadEmail($emailId);
+
+        $regionsLoadInput = array("beanId" => $emailLoadOutput["bus_entity_campaign_email"]["beanId"]);
+
+        $regionsLoadOutput = $this->sendRequest("bus_facade_campaign_email", "loadDynamicRegions", $regionsLoadInput, null);
+
+        return $regionsLoadOutput;
     }
 
     /**
@@ -313,6 +342,25 @@ class PaintMethods extends PaintSession
     }
 
     /**
+    * Load an existing email using a reference number.
+    */
+    public function loadEmail($emailId)
+    {
+        $entityInput    = null;
+        $resultOutput   = null;
+
+        $entityInput = array("emailId" => $emailId);
+
+        // Use the unique id to retrieve the email and return the bean data
+        $resultOutput = $this->sendRequest("bus_facade_campaign_email", "load", $entityInput, null);
+        //$resultOutput = $resultOutput["bus_entity_campaign_email"];
+
+        $resultOutput = $this->sendRequest("bus_facade_campaign_email", "load", $entityInput, null);
+
+        return $resultOutput;
+    }
+
+    /**
     * Load an existing delivery using a reference number.  High level report data will be returned
     */
     public function loadDelivery($deliveryId)
@@ -328,24 +376,7 @@ class PaintMethods extends PaintSession
         
         return $resultOutput;
     }
-    
-    /**
-    * Load an existing email using an email ID
-    */
-    public function loadEmail($emailId)
-    {
-        $entityInput    = null;
-        $resultOutput   = null;
-        
-        $entityInput = array("emailId" => $emailId);
 
-        // Use the unique id to retrieve the delivery and return the bean data
-        $resultOutput = $this->sendRequest("bus_facade_campaign_email", "load", $entityInput, null);
-        $resultOutput = $resultOutput["bus_entity_campaign_email"];      
-        
-        return $resultOutput;
-    }
-    
     /**
     * Load an existing list using a list ID
     */
@@ -381,6 +412,33 @@ class PaintMethods extends PaintSession
         $updateInput["beanId"] = $emailObject["beanId"];
 
         $updateInput["field".$oldFieldColNo."Name"] = $newFieldName;
+
+        // Update with data and save
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "update", $updateInput, null);
+        $resultOutput = $this->sendRequest("bus_facade_campaign_list", "store", $updateInput, null);
+
+        return $resultOutput;
+    }
+
+     /**
+    * Modify the data type of a list field
+    */
+    public function modifyListFieldDataType($listId, $oldFieldColNo, $newFieldDataType, $newFieldDataFormat)
+    {
+        $entityInput    = null;
+        $resultOutput   = null;
+
+        $entityInput = array("listId" => $listId);
+
+        // Use the unique id to retrieve the delivery and return the bean data
+        $rawResult = $this->sendRequest("bus_facade_campaign_list", "load", $entityInput, null);
+        $emailObject = $rawResult["bus_entity_campaign_list"];
+
+        $updateInput = array();
+        $updateInput["beanId"] = $emailObject["beanId"];
+
+        $updateInput["field".$oldFieldColNo."DataType"] = $newFieldDataType;
+        $updateInput["field".$oldFieldColNo."DataFormat"] = $newFieldDataFormat;
 
         // Update with data and save
         $resultOutput = $this->sendRequest("bus_facade_campaign_list", "update", $updateInput, null);
