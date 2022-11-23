@@ -113,6 +113,25 @@ class PaintMethods extends PaintSession
 		return $resultOutput;
     }
 
+    /**
+     * Search emails
+     */
+    public function searchLists($listName = null)
+    {
+        $searchInput = array();
+        $resultOutput = null;
+
+        // Search to see if an email already exists with this name (assumes no SMS on the account)
+        if(!empty($listName))
+        {
+            $searchInput["listName"] = $listName;
+        }
+
+        $resultOutput = $this->search("bus_facade_campaign_list", $searchInput);
+
+        return $resultOutput;
+    }
+
    /**
      * Create a new message on the account.  This function isolates some of the basic features
      * of a message.  More complicated features must be accessed using the sendRequest
@@ -323,13 +342,13 @@ class PaintMethods extends PaintSession
     }
 
     /**
-    * Load an existing email using a reference number. 
+    * Load an existing email using a reference number.
     */
     public function loadEmail($emailId)
     {
         $entityInput    = null;
         $resultOutput   = null;
-        
+
         $entityInput = array("emailId" => $emailId);
 
         // Use the unique id to retrieve the email and return the bean data
@@ -337,10 +356,10 @@ class PaintMethods extends PaintSession
         //$resultOutput = $resultOutput["bus_entity_campaign_email"];
 
         $resultOutput = $this->sendRequest("bus_facade_campaign_email", "load", $entityInput, null);
-        
+
         return $resultOutput;
     }
-    
+
     /**
     * Load an existing delivery using a reference number.  High level report data will be returned
     */
@@ -357,7 +376,7 @@ class PaintMethods extends PaintSession
         
         return $resultOutput;
     }
-    
+
     /**
     * Load an existing list using a list ID
     */
@@ -397,7 +416,7 @@ class PaintMethods extends PaintSession
         // Update with data and save
         $resultOutput = $this->sendRequest("bus_facade_campaign_list", "update", $updateInput, null);
         $resultOutput = $this->sendRequest("bus_facade_campaign_list", "store", $updateInput, null);
-       
+
         return $resultOutput;
     }
 
@@ -408,7 +427,7 @@ class PaintMethods extends PaintSession
     {
         $entityInput    = null;
         $resultOutput   = null;
-        
+
         $entityInput = array("listId" => $listId);
 
         // Use the unique id to retrieve the delivery and return the bean data
